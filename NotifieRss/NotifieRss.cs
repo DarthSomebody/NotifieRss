@@ -1,48 +1,27 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Xml;
 
 namespace NotifieRss
 {
     public partial class NotifieRss_Form : Form
     {
         /// <summary>
-        /// Worker to read from RSS on another thread
+        /// The functionality of this form.
         /// </summary>
-        private NotifieRssWorker Worker;        
-
-
-
+        TaskManager Manager;
+        
         /// <summary>
         /// Constructor
         /// </summary>
-        public NotifieRss_Form(string URL, string Keyword, string File)
+        public NotifieRss_Form()
         {
             InitializeComponent();
-
-            URL_Box.Text = URL;
-            Keyword_Box.Text = Keyword;
-            File_Box.Text = File;
-
-            Worker = new NotifieRssWorker();
+            Manager = new TaskManager(TaskListView);
         }
-                
+                        
         /// <summary>
-        /// Callback for when a worker finishes
-        /// </summary>
-        private void Finish()
-        {
-            MethodInvoker Invoker = delegate()
-            {
-                Cancel_Button.Enabled = false;                
-            };
-
-            Invoke(Invoker);
-        }
-                
-        /// <summary>
-        /// Click-Event for the file button
+        /// Click-Event for the file button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event info</param>
@@ -52,55 +31,27 @@ namespace NotifieRss
         }
         
         /// <summary>
-        /// Click-Event for the OK button
+        /// Click-Event for the start button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event info</param>
-        private void OK_Button_Click(object sender, EventArgs e)
+        private void Start_Button_Click(object sender, EventArgs e)
         {
-            // Check if url is valid
-            XmlNodeList NodeList;
-            if (!new RSSReader().LoadRSS(URL_Box.Text, out NodeList))
-            {
-                MessageBox.Show(this, "Couldn't find RSS feed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // Change state of UI elements
-            Cancel_Button.Enabled = true;
-            OK_Button.Enabled = false;
-            URL_Box.Enabled = false;
-            Keyword_Box.Enabled = false;
-            File_Button.Enabled = false;
-            Keyword_Label.Enabled = false;
-            URL_Label.Enabled = false;
-
-            // Start worker
-            Worker.Start(URL_Box.Text, Keyword_Box.Text, File_Box.Text, Finish);
+            Manager.StartSelectedTasks();
         }
         
         /// <summary>
-        /// Click-Event for the cancel button
+        /// Click-Event for the stop button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event info</param>
-        private void Cancel_Button_Click(object sender, EventArgs e)
+        private void Stop_Button_Click(object sender, EventArgs e)
         {
-            // Stop worker
-            Worker.Stop();
-
-            // Change state of UI elements
-            Cancel_Button.Enabled = false;
-            OK_Button.Enabled = true;
-            URL_Box.Enabled = true;
-            Keyword_Box.Enabled = true;
-            File_Button.Enabled = true;
-            Keyword_Label.Enabled = true;
-            URL_Label.Enabled = true;
+            Manager.StopSelectedTasks();
         }
         
         /// <summary>
-        /// FileOk-Event for the file dialog
+        /// FileOk-Event for the file dialog.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event info</param>
@@ -110,13 +61,106 @@ namespace NotifieRss
         }
 
         /// <summary>
-        /// Event for when the text in the URL box changes
+        /// Click-Event for the add button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event info</param>
-        private void URL_Box_TextChanged(object sender, EventArgs e)
+        private void Add_Button_Click(object sender, EventArgs e)
         {
-            OK_Button.Enabled = URL_Box.Text.Length > 0;
+            // Try to add task
+            if (!Manager.AddTask(URL_Box.Text, Keyword_Box.Text, File_Box.Text, Autostart_Checkbox.Checked))
+            {
+                MessageBox.Show(this, "Couldn't find RSS feed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            ResetAddForm();
+        }
+
+        /// <summary>
+        /// Click-Event for the remove button.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void Remove_Button_Click(object sender, EventArgs e)
+        {
+            Manager.RemoveSelectedTasks();
+        }
+
+        /// <summary>
+        /// Event for closing the form.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void NotifieRss_Form_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Manager.StopAllTasks();
+        }
+
+        /// <summary>
+        /// Click-Event for the clear button
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void Clear_Button_Click(object sender, EventArgs e)
+        {
+            ResetAddForm();
+        }
+
+        /// <summary>
+        /// Event for changing the checked status of the list
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void TaskListView_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            bool bHasSelectedTasks = Manager.HasSelectedTasks();
+            Stop_Button.Enabled = bHasSelectedTasks;
+            Start_Button.Enabled = bHasSelectedTasks;
+            Remove_Button.Enabled = bHasSelectedTasks;
+        }
+
+        /// <summary>
+        /// Resets the form elements that are used to add a new task.
+        /// </summary>
+        private void ResetAddForm()
+        {
+            // Reset form elements
+            URL_Box.Text = "";
+            Keyword_Box.Text = "";
+            File_Box.Text = "";
+            Autostart_Checkbox.Checked = true;
+            File_Dialog.Reset();
+        }
+
+        /// <summary>
+        /// Minimize/maximize event
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void NotifieRss_Form_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                TrayIcon.Visible = true;
+                Hide();
+            }
+
+            else if (WindowState == FormWindowState.Normal)
+            {
+                TrayIcon.Visible = false;
+            }
+        }
+
+        /// <summary>
+        /// Tray icon double click event
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event info</param>
+        private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            Show();
+            WindowState = FormWindowState.Normal;
         }
     }
 }

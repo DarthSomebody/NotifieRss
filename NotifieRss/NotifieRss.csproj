@@ -35,27 +35,26 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ListSerializer.cs" />
     <Compile Include="NotifieRss.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="NotifieRss.Designer.cs">
       <DependentUpon>NotifieRss.cs</DependentUpon>
     </Compile>
-    <Compile Include="NotifieRssWorker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Task.cs" />
     <Compile Include="RSSReader.cs" />
+    <Compile Include="TaskManager.cs" />
+    <Compile Include="Worker.cs" />
     <EmbeddedResource Include="NotifieRss.resx">
       <DependentUpon>NotifieRss.cs</DependentUpon>
     </EmbeddedResource>
