@@ -17,6 +17,8 @@ namespace NotifieRss
         public NotifieRss_Form()
         {
             InitializeComponent();
+            Hide();
+
             Manager = new TaskManager(TaskListView);
         }
                         
@@ -95,6 +97,7 @@ namespace NotifieRss
         private void NotifieRss_Form_FormClosing(object sender, FormClosingEventArgs e)
         {
             Manager.StopAllTasks();
+            Application.Exit();
         }
 
         /// <summary>

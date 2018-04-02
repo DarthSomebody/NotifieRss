@@ -14,7 +14,9 @@ namespace NotifieRss
             // Run windows form
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new NotifieRss_Form());
+
+            NotifieRss_Form Form = new NotifieRss_Form();
+            Application.Run();
         }
     }
 }
