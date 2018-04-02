@@ -298,6 +298,7 @@
             this.Name = "NotifieRss_Form";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "NotifieRSS";
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotifieRss_Form_FormClosing);
             this.Resize += new System.EventHandler(this.NotifieRss_Form_Resize);
             Add_Group.ResumeLayout(false);
