@@ -53,7 +53,7 @@ namespace NotifieRss
 
             // Set needed info
             this.Info = Info;
-            this.Time = DateTime.Now.ToUniversalTime();
+            this.Time = DateTime.Now;
             this.WorkerThread = new Thread(Work);
 
             // Start worker
