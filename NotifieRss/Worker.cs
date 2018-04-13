@@ -68,7 +68,7 @@ namespace NotifieRss
             while (true)
             {
                 // Parse RSS feed until keyword was found
-                while (!Reader.Parse(Info.URL, Info.Keywords, Time))
+                while (!Reader.Parse(Info.URL, Info.Keywords, ref Time))
                 {
                     Thread.Sleep((int)Info.Interval * 1000);
                 }

@@ -48,7 +48,7 @@ namespace NotifieRss
         /// <param name="Keyword">Keyword to search for</param>
         /// <param name="Time">Minimum time for entries to be valid</param>
         /// <returns>True, if a matching entry was found</returns>
-        public bool Parse(string URL, string Keyword, DateTime Time)
+        public bool Parse(string URL, string Keyword, ref DateTime Time)
         {
             // Load the RSS file
             XmlNodeList NodeList;
@@ -78,6 +78,9 @@ namespace NotifieRss
                     // Get link
                     SubNode = Node.SelectSingleNode("link");
                     ResultLink = SubNode != null ? SubNode.InnerText : "";
+
+                    // Change time
+                    Time = RssTime.AddMinutes(1.0);
 
                     // Success
                     return true;
